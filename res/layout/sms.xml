@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    
+ <ImageView
+        android:id="@+id/smsContactPhoto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/phoneNum"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/contact_photo" />
+
+    <TextView
+        android:id="@+id/smsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/smsContactPhoto"
+        android:layout_below="@+id/smsPhoneNum"
+        android:layout_toRightOf="@+id/smsContactPhoto"
+        android:ems="20"
+        android:text="缴费通知" />
+
+    <TextView
+        android:id="@+id/smsPhoneNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/smsContactPhoto"
+        android:autoLink="phone"
+        android:ems="10"
+        android:text="13681397064" />
+
+</RelativeLayout>
