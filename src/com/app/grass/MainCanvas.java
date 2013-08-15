@@ -6,6 +6,8 @@ import java.util.List;
 import android.app.ListActivity;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,22 +16,25 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.SherlockListFragment;
+import com.actionbarsherlock.app.ActionBar.TabListener;
 import com.android.common.Contact;
 import com.android.common.Global;
 
-public class MainCanvas extends ListActivity {
-	ListView mListView;
+public class MainCanvas extends /*ListActivity*/ SherlockListFragment implements TabListener {
+	//ListView mListView;
 	@Override  
     public void onCreate(Bundle savedInstanceState) {  
-		Global.context = this;  
-		mListView = this.getListView();  
+		//Global.context = this.getActivity().getBaseContext();  
+		//mListView = this.getListView();  
 	    /**得到手机通讯录联系人信息**/  
-		ArrayList<Contact> contactList = Global.contactMgr.getPhoneContacts(this);
+		//ArrayList<Contact> contactList = Global.contactMgr.getPhoneContacts(Global.context);
   
-	   BaseAdapter myAdapter = new MyListAdapter(contactList, this);  
-	   setListAdapter(myAdapter);  
+	  // BaseAdapter myAdapter = new MyListAdapter(contactList, Global.context);  
+	   //setListAdapter(myAdapter);  
   
-  
+	   
 	   /* mListView.setOnItemClickListener(new OnItemClickListener() {  
 	  
 	        @Override  
@@ -43,7 +48,36 @@ public class MainCanvas extends ListActivity {
 	    });  */
   
 	    super.onCreate(savedInstanceState);  
-    }  
+    }
+	
+	@Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+        /** Creating array adapter to set data in listview */
+		Global.context = this.getActivity().getBaseContext();  
+		//mListView = this.getListView();  
+	    /**得到手机通讯录联系人信息**/  
+		ArrayList<Contact> contactList = Global.contactMgr.getPhoneContacts(Global.context);
+  
+	   BaseAdapter myAdapter = new MyListAdapter(contactList, Global.context);  
+	   setListAdapter(myAdapter);  
+ 
+        return super.onCreateView(inflater, container, savedInstanceState);
+ 
+    }
+	
+	@Override
+	public void onTabReselected(Tab arg0, FragmentTransaction arg1) {
+				
+	}
+	@Override
+	public void onTabSelected(Tab arg0, FragmentTransaction arg1) {
+		arg1.add(android.R.id.content, this,"android");
+		arg1.attach(this);		
+	}
+	@Override
+	public void onTabUnselected(Tab arg0, FragmentTransaction arg1) {
+		arg1.detach(this);		
+	}  
 }
 	class MyListAdapter extends BaseAdapter {  
 		public List<Contact> contactList;

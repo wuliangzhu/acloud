@@ -3,7 +3,9 @@ package com.android.common;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -124,7 +126,7 @@ public class SMSManager {
 			}
 		}
 		
-		public ArrayList<ShortMessage> getSmsInPhone(Context context) {  
+		public ArrayList<MessageGroup> getSmsInPhone(Context context) {  
 	        final String SMS_URI_ALL = "content://sms/";  
 	        final String SMS_URI_INBOX = "content://sms/inbox";  
 	        final String SMS_URI_SEND = "content://sms/sent";  
@@ -133,7 +135,8 @@ public class SMSManager {
 	        final String SMS_URI_FAILED = "content://sms/failed";  
 	        final String SMS_URI_QUEUED = "content://sms/queued";  
 	  
-	        ArrayList<ShortMessage> messages = new ArrayList<ShortMessage>();  
+	        ArrayList<MessageGroup> messages = new ArrayList<MessageGroup>();  
+	        Map<String, MessageGroup> msgMap = new HashMap<String, MessageGroup>();
 	  
 	        try {  
 	            Uri uri = Uri.parse(SMS_URI_ALL);  
@@ -180,7 +183,15 @@ public class SMSManager {
 	                    sm.date = new Date(longDate);
 	                    sm.type = intType;
 	                    
-	                    messages.add(sm);
+	                    MessageGroup mg = msgMap.get(strAddress);
+	                    if (mg == null) {
+	                    	mg = new MessageGroup();
+	                    	mg.phoneNum = strAddress;
+	                    	
+	                    	msgMap.put(strAddress, mg);
+	                    }
+	                    mg.lastMessage = strbody;
+	                    mg.messages.add(sm);	                    
 	                } while (cur.moveToNext());  
 	  
 	                if (!cur.isClosed()) {  
@@ -194,7 +205,8 @@ public class SMSManager {
 	        } catch (SQLiteException ex) {  
 	            Log.d("SQLiteException in getSmsInPhone", ex.getMessage());  
 	        }  
-	  
+	        messages.addAll(msgMap.values());
+	        
 	        return messages;  
 	    }  
 }  

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -18,6 +19,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Contacts.Photo;
 import android.text.TextUtils;
 
+import com.android.db.DbTools;
 import com.app.grass.R;
 
 /**
@@ -156,5 +158,33 @@ public class ContactManager {
            }
         
         return records;
+	}
+	
+	/**
+	 * 加入黑名单，黑名单的电话和短信都会自动拦截
+	 */
+	public void addBlackList(String phoneNum){
+		if (this.isBlack(phoneNum)){
+			return;
+		}
+		
+		ContentValues cv = new ContentValues();
+		cv.put("phoneNum", phoneNum);
+		
+		DbTools.insert("BlackList", cv);
+	}
+	
+	public void delBlackList(String phoneNum){
+		DbTools.delete("BlackList", "phoneNum = ?", new String[]{phoneNum});
+	}
+	
+	public ArrayList<String> getBlackList() {
+		return DbTools.selectAllBlackList();
+	}
+	
+	public boolean isBlack(String phoneNum){
+		String pn = DbTools.selectBlackList(phoneNum);
+		
+		return pn != null;
 	}
 }

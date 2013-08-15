@@ -3,55 +3,92 @@ package com.app.grass;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.ActionBar.TabListener;
+import com.actionbarsherlock.app.SherlockListFragment;
 import com.android.common.Contact;
 import com.android.common.Global;
+import com.android.common.MessageGroup;
 import com.android.common.ShortMessage;
+import com.android.db.DbTools;
 
 import android.app.ListActivity;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class SMSActivity extends ListActivity {
+public class SMSActivity extends /*ListActivity*/ SherlockListFragment implements TabListener {
 	ListView mListView;
-	@Override  
-    public void onCreate(Bundle savedInstanceState) {  
-		Global.context = this;  
-		mListView = this.getListView();  
-	    /**得到手机通讯录联系人信息**/  
-		ArrayList<ShortMessage> contactList = Global.smsMgr.getSmsInPhone(this);
+	
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+			Global.context = this.getActivity().getBaseContext();  
+			
+			DbTools.createDb(Global.context);
+			
+			mListView = this.getListView();
+			   
+			  mListView.setOnItemClickListener(new ListView.OnItemClickListener() {
+				@Override
+				public void onItemClick(AdapterView<?> adapterView, View view,
+						int position, long id) {
+					    Log.d("ERROR", "add blackList start:");
+						MyListAdapter2 adapter = (MyListAdapter2)adapterView.getAdapter();
+						MessageGroup mg = adapter.contactList.get(position);
+						
+					    Global.contactMgr.addBlackList(mg.phoneNum);
+					    Log.d("ERROR", "add blackList:" + mg.phoneNum);
+						//return false;
+				}
+			   });
+		  
+		super.onActivityCreated(savedInstanceState);
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		/**得到手机通讯录联系人信息**/  
+		ArrayList<MessageGroup> contactList = Global.smsMgr.getSmsInPhone(Global.context);
   
-	   BaseAdapter myAdapter = new MyListAdapter2(contactList, this);  
+	   BaseAdapter myAdapter = new MyListAdapter2(contactList, Global.context);  
 	   setListAdapter(myAdapter);  
-  
-  
-	   /* mListView.setOnItemClickListener(new OnItemClickListener() {  
+	   Log.d("ERROR", "set click listener");
+
 	  
-	        @Override  
-	        public void onItemClick(AdapterView<?> adapterView, View view,  
-	            int position, long id) {  
-	        //调用系统方法拨打电话  
-	        Intent dialIntent = new Intent(Intent.ACTION_CALL, Uri  
-	            .parse("tel:" + mContactsNumber.get(position)));  
-	        startActivity(dialIntent);  
-	        }  
-	    });  */
-  
-	    super.onCreate(savedInstanceState);  
-    }  
+		return super.onCreateView(inflater, container, savedInstanceState);
+	}
+
+	@Override
+	public void onTabReselected(Tab arg0, FragmentTransaction arg1) {
+		
+	}
+	@Override
+	public void onTabSelected(Tab arg0, FragmentTransaction arg1) {
+		arg1.add(android.R.id.content, this,"android");
+		arg1.attach(this);		
+	}
+	@Override
+	public void onTabUnselected(Tab arg0, FragmentTransaction arg1) {
+		arg1.detach(this);		
+	}  
 }
 	class MyListAdapter2 extends BaseAdapter {  
-		public List<ShortMessage> contactList;
+		public List<MessageGroup> contactList;
 		public Context mContext;
 		
-	    public MyListAdapter2(ArrayList<ShortMessage> contacts, Context context) {  
+	    public MyListAdapter2(ArrayList<MessageGroup> contacts, Context context) {  
 	        mContext = context;  
 	        this.contactList = contacts;
 	    }  
@@ -86,12 +123,12 @@ public class SMSActivity extends ListActivity {
 		        text = (TextView) convertView.findViewById(R.id.smsText);  
 	        }  
 	        
-	        ShortMessage sms = contactList.get(position);
+	        MessageGroup sms = contactList.get(position);
 	        image.setImageBitmap(BitmapFactory.decodeResource(
 					mContext.getResources(), R.drawable.contact_photo));
-	        text.setText(sms.body);
+	        text.setText(sms.lastMessage);
 	        
-	        String pn = sms.address;
+	        String pn = sms.phoneNum;
 	        StringBuffer sb = new StringBuffer();
 	        if (pn.startsWith("+86")) {
 	        	pn = pn.substring(3);
